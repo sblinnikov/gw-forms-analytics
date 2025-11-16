@@ -254,13 +254,8 @@ xhigh(η):=float (1/6 * (1 + 7/18 *η)) /* 2nd order PN xhigh */;
 
 
 /* [wxMaxima: comment start ]
-For a specific binary system, uncomment the next three lines:
+For a specific binary system, use the following variables:
    [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-xinput: 0.004;
-/* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -442,7 +437,7 @@ Expr6N_new(z,M,η):=subst([x(t)=z],Expr6PN(t,M,η));
 
 
 /* [wxMaxima: comment start ]
-Uncomment this line and change z --> xinput, M --> Minput, η --> ηinput to see the whole expression:
+Uncomment this line to see the whole expression:
    [wxMaxima: comment end   ] */
 
 
@@ -549,7 +544,7 @@ Tfin(M,η):=float(0.9*t_cr(M,η));
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, t6N(x,Minput,ηinput), x6N(x), [x,xlow(Minput),xhigh(ηinput)]], [y,t6N(xlow(Minput),Minput,ηinput),t6N(xhigh(ηinput),Minput,ηinput)],  [style,[lines,5]],[xlabel,"t (s)" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), x6N(x), [x,xlow(Minput),xhigh(ηinput)]],  [nticks,100],   [style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"x_{ins}"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] );
 /* [wxMaxima: input   end   ] */
 
@@ -759,14 +754,8 @@ wxplot2d([parametric, t6N(x,Minput,ηinput), dwdx(x,Minput,ηinput), [x,xlow(Min
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, t6N(x,Minput,ηinput), dwdt(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]], [y,0,100],[nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
-           [ylabel,"dwdt"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
 wxplot2d([parametric, t6N(x,Minput,ηinput), dwdt(x,Minput,ηinput)/omega6N(x,Minput,ηinput)^(11/3),
-        [x,xlow(Minput),xhigh(ηinput)]], [y,0,1/10^5],[nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
+        [x,xlow(Minput),xhigh(ηinput)]], [nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"dwdt"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 
