@@ -1,8 +1,18 @@
 /* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
 /* [ Created with wxMaxima version 20.12.1 ] */
 /* [wxMaxima: title   start ]
-test gw binary
+gw binary
    [wxMaxima: title   end   ] */
+
+
+/* [wxMaxima: comment start ]
+The main result of this script in 6, "Calculation of the Inspiral Waveform", %i98.
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: comment start ]
+All references below are taken from our paper https://arxiv.org/abs/2510.25523, https://ui.adsabs.harvard.edu/abs/2025arXiv251025523M/abstract 
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: section start ]
@@ -11,11 +21,11 @@ Inspiral Phase Time Evolution
 
 
 /* [wxMaxima: comment start ]
-Здесь следуем работе Dillon Buskirk and Maria Babiuc Hamilton 2018
+Here we follow Dillon Buskirk and Maria Babiuc-Hamilton, 2018
 arXiv:1810.06160
-Wolfram nb (notebook) взято отсюда:
- https://github.com/mbabiuc/MathScripts.git
-и построчно переписано на язык maxima;
+Wolfram nb (notebook) is from:
+https://github.com/mbabiuc/MathScripts.git
+and line by line is translated to Maxima.
    [wxMaxima: comment end   ] */
 
 
@@ -34,19 +44,29 @@ reset();
 /* [wxMaxima: input   end   ] */
 
 
+/* [wxMaxima: comment start ]
+Uncomment the next two lines if you want to see the type and space size of the script:
+   [wxMaxima: comment end   ] */
+
+
 /* [wxMaxima: input   start ] */
-:lisp (lisp-implementation-type)
+/* :lisp (lisp-implementation-type) */;
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-:lisp (sb-ext:dynamic-space-size)
+/* :lisp (sb-ext:dynamic-space-size) */;
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-ratprint:false /*disables the 'rat: replaced' output*/;
+ratprint: false /*disables the 'rat: replaced' output*/;
 /* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+The next three lines load packages for physical units:
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -64,40 +84,37 @@ propvars (physical_constant);
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: subsubsect start ]
+/* [wxMaxima: subsect start ]
 Setting up the Mass Parameters
-   [wxMaxima: subsubsect end   ] */
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: comment start ]
-Change here the mass parameters, x -- это малый параметр порядка (v/c)^2,
-где v -- круговая скорость . Начальное значение x обозначено xlow:
+The script below uses symbolic parameter M for total mass of a binary, 
+M = m1 + m2, 
+where m1 and m2 are the masses of the stars; 
+μ = (m1*m2)/M
+is the reduced mass; 
+η = μ/M
+is dimensionless mass ratio.
+
+For numerical outputs and plots, substitute 
+Minput in place of M,
+ηinput in place of η.
+
+Below x is a post-Newtonian parameter of order (v/c)^2,
+where v is orbital velocity. Initial value of x is denoted xlow.
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: comment start ]
-xlow : 0.0336997; 
+Uncomment the next line to set precision for output:
    [wxMaxima: comment end   ] */
 
 
-/* [wxMaxima: comment start ]
-Массы звёзд в единицах Msun: m1,m2
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
--- т.е. здесь чёрные дыры, ниже отношение масс и приведённая масса:
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-fpprec: 8; 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-fpprintprec: 6; 
-   [wxMaxima: comment end   ] */
+/* [wxMaxima: input   start ] */
+/* fpprintprec: 6 */ ;
+/* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -106,49 +123,54 @@ assume(η>0);
 
 
 /* [wxMaxima: input   start ] */
-assume(M>0);
+assume(M>0); 
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: comment start ]
-Geometric Units
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
- Ms = M * (4.923 * 10^-6));(*Expressing mass in seconds*)
+Ms = M * (4.923 * 10^-6));(*Expressing mass in seconds*)
 -- a line from pdf made from nb by Mathematica
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-γ: float(%gamma);/*Euler-Mascheroni constant*/
+γ: float(%gamma);/* Euler-Mascheroni constant */
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-e: 0; /*eccentricity -- delete ": 0" when solving for e != 0*/
+e: 0; /* eccentricity -- delete ": 0" when solving for e != 0 */
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-R; /*Distance to the observer - Can change R to fit as desired*/
+R; /* distance to the observer - can change R to fit as desired */
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-i: 0; /*assume optimal orientation of observer*/
+i: 0; /* assume optimal orientation of observer */
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-κ: 0; /*assume optimal orientation of observer*/
+κ: 0; /* assume optimal orientation of observer */
 /* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+The threshold value flow (LIGO Collaboration, 2015) is the lowest frequency is fixed at 10 Hz:
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-flow: 10; /* cut-off, i.e., lowest frequency is fixed at 10 Hz */
+flow: 10; 
 /* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+Gravitational constant and the speed of light from the Maxima physical_constants package (in SI units): 
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -162,13 +184,18 @@ c: float(qty(constvalue(%c)));
 
 
 /* [wxMaxima: comment start ]
-Expressing solar mass in kg, sec. or m :
+We are working in Geometrized Units where G = c = 1, expressing everything in seconds.
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-Mo_kg: float(1.98841*10^30); /* Solar mass in kg, checked in PDG & CODATA */
+Mo_kg: float(1.98841*10^30); /* Solar mass in kg, according to PDG 2023 */
 /* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+Solar mass in meters (this is half Schwarzschild radius, r_g/2 == G*Mo_kg/c^2):
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -177,7 +204,7 @@ Mo_m: float(G*Mo_kg/c^2);
 
 
 /* [wxMaxima: comment start ]
-Mo_m : 1476; /*  this is r_g/2 == G M_kg /c^2 */ 
+Solar mass in seconds, we take r_g/(2c) == Mo_m/c:
    [wxMaxima: comment end   ] */
 
 
@@ -187,64 +214,82 @@ Mo_s: float(Mo_m/c);
 
 
 /* [wxMaxima: comment start ]
-Mo_s :  4.923*10^(-6); /*  Solar mass in seconds, we take r_g/(2c)  == Mo_m/c */   
+Expressing total mass of the binary in seconds:
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-Ms(M) := (Mo_s*M); /*Expressing mass in seconds*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-Mr(M) :=  M*Mo_m;  /*Expressing mass in meters*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-v0(M):= float((Ms(M)*%pi*flow)^(1/3))
-/*initial binary velocityfrom Kepler's law*/;
+Ms(M):= (Mo_s*M); 
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: comment start ]
-Вычисление xlow по формуле (22) Buskirk and Hamilton 2018.
+Initial binary velocity from Kepler's law:
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-xlow(M):=v0(M)^2;
+v0(M):= float((Ms(M)*%pi*flow)^(1/3));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+Calculating xlow using the formula (22) from Buskirk and Hamilton, 2018.
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: input   start ] */
+xlow(M):=v0(M)^2; /* note that here we already took c = 1 */
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+The upper boundary xhigh:
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: input   start ] */
+xhigh(η):=float (1/6 * (1 + 7/18 *η)) /* 2nd order PN xhigh */;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+For a specific binary system, uncomment the next three lines:
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: input   start ] */
+xinput: 0.004;
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-xhigh(η):=float ( 1/6 * (1 + 7/18 *η)) /* 2nd order PN xhigh */;
+Minput: 40;
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-temp: 100;
-/*temporary final integration time, set up to something bigtime */
+ηinput: 1/4;
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: subsubsect start ]
-First Level, constants
-   [wxMaxima: subsubsect end   ] */
+/* [wxMaxima: subsect start ]
+First Level, Constants
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
-α0: 153.8803; 
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-α1: -55.13; 
+α0: 153.8803;
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-α2: 588; 
+α1: -55.13;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+α2: 588;
 /* [wxMaxima: input   end   ] */
 
 
@@ -253,16 +298,13 @@ First Level, constants
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: subsubsect start ]
-Second level, depending on the symmetric mass ratio
-   [wxMaxima: subsubsect end   ] */
+/* [wxMaxima: subsect start ]
+Second Level, Depending on the Symmetric Mass Ratio
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: comment start ]
-Коэффицианты а_{k/2} из (6) в статье arXiv:1810.06160, которые выписаны в appendix B.
-Непонятно, почему в (6) начинают с a_1, а в приложении B и здесь начинают с a_4:
-
-Ниже вместо Simplify попробоать другие из ДЗ, либо же всё свести к eta
+Coefficients а_{k/2} from (6) in arXiv:1810.06160, which are provided in Appendix B.
    [wxMaxima: comment end   ] */
 
 
@@ -275,11 +317,6 @@ a4(η):= (-5*η*α0 - (97*η^4)/3888 - (18929389*η^3)/
   126 + (124741*γ)/4410 + 3959271176713/25427001600 - (
   47385*float(log(3)))/1568 + (127751*float (log(2)))/1470);
 /* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Ниже тоже trigsipm etc. or eta:
-   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -307,7 +344,7 @@ a5(η):=(( (155*α0*η^2)/12 + (1195*α0*η)/336 -
 
 
 /* [wxMaxima: comment start ]
-Thus the coefficient before log(x(t)) coincides with original -- it is much more economical to put one float around the whole expression than around each %pi, log, etc.
+Thus the coefficient before log(x(t)) coincides with original --- it is much more economical to put one float around the whole expression than around each %pi, log, etc.
    [wxMaxima: comment end   ] */
 
 
@@ -322,11 +359,6 @@ a5p5(η):= ((-20*π*η*α0 + (49187*π*η^4)/6048 - (
   91347297344213*π)/81366405120 - 142155/784* π*log(3) + (
   5069891 *π*log(2))/17640));
 /* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Завершают в (6) и в приложении B на a_6:
-   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -364,9 +396,9 @@ a6(η):= (-((535 *α0*η^3)/36) + (7295 *α0*η^2)/
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: subsubsect start ]
-Calculating PN Parameter-x for e =0 (zero eccentricity)
-   [wxMaxima: subsubsect end   ] */
+/* [wxMaxima: subsect start ]
+Calculating PN-Parameter x for e = 0 (Zero Eccentricity)
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -389,36 +421,19 @@ Expr4to6(t,M,η):= (64*η*x(t)^5)/
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: comment start ]
-/*  dx/dt */
-   [wxMaxima: comment end   ] */
-
-
 /* [wxMaxima: input   start ] */
 Expr6PN(t,M,η):=((Expr3p5PN(t,M,η) + Expr4to6(t,M,η))/Ms(M));
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: input   start ] */
-/*float(Expr6PN(t,40,1/4));*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: subsect start ]
-Правильное разложение в ряд Тейлора
-   [wxMaxima: subsect end   ] */
+/* [wxMaxima: section start ]
+Taylor Expansion
+   [wxMaxima: section end   ] */
 
 
 /* [wxMaxima: comment start ]
-для taylor 6 членов 11.86681580074917
-4 члена 11.87565132559987
-2 члена 12.12349634499317
+Here and below z == x(t) for simplicity.
    [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: subsect start ]
-Тейлор общий случай
-   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -426,8 +441,13 @@ Expr6N_new(z,M,η):=subst([x(t)=z],Expr6PN(t,M,η));
 /* [wxMaxima: input   end   ] */
 
 
+/* [wxMaxima: comment start ]
+Uncomment this line and change z --> xinput, M --> Minput, η --> ηinput to see the whole expression:
+   [wxMaxima: comment end   ] */
+
+
 /* [wxMaxima: input   start ] */
-/*Expr6N_new(z,M,η);*/
+/* Expr6N_new(z,M,η) */
 /* [wxMaxima: input   end   ] */
 
 
@@ -437,32 +457,22 @@ A5: coeff(expand(Expr6N_new(z,M,η)), z^5);
 
 
 /* [wxMaxima: input   start ] */
-/*ev(A5);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
 Expr6NA(u,M,η):=at(Expr6N_new(z,M,η)/(A5*z^5),z=u);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
- Expr6NInv(z,M,η):=at(1/Expr6NA(u,M,η),u=z);
+Expr6NInv(z,M,η):=at(1/Expr6NA(u,M,η),u=z);
 /* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+Here you can change the order of the Taylor expansion (we take the 6th order):
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
 Expr6NTat(u,M,η):=at(taylor(Expr6NInv(z,M,η),z,0,6),z=u);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*Expr6NT1:1*float(Expr6NT(xx));*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*float(Expr6NT1(xx));*/;
 /* [wxMaxima: input   end   ] */
 
 
@@ -477,22 +487,12 @@ result6Nat(u,M,η):=at(integrate(Expr6NTAat(z,M,η), z),z=u);
 
 
 /* [wxMaxima: input   start ] */
-float(result6Nat(0.04,40,1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*res6N:result6N(z);*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
 res6Nat:result6Nat(z,M,η)$
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: comment start ]
-функция fres6N() выдаёт результат интегрирования \int dx/f(x), где f(x)==Expr6NTA(x) с размерностью времени t
+Function fres6N() gives the result of the integration \int dx/f(x), where f(x)==Expr6NTA(x) with the unit of t (time).
    [wxMaxima: comment end   ] */
 
 
@@ -501,58 +501,35 @@ define(fres6N(z,M,η), res6Nat)$
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: input   start ] */
-/*wxplot2d(  [fres6N(z),fres6Nat(z)], [ z, xlow, 0.3],
-           [style,[lines,5]],[ylabel," "],
-           [xlabel,"x"],[ylabel,"t"],[legend,"fres6N","fres6Nat"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-float(fres6N(0.04,40,1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-float(fres6N(0.03371103429502694,40,1/4));/*это fres6N(xlow) или C*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-11.97365014142424 --- 6 порядок - старая fres6N
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-11.8667674876125 --- 6 порядок  новая fres6n (fres6Nat) 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-f_compare(x):=fres6N(xlow)-fres6N(x); 
-   [wxMaxima: comment end   ] */
-
-
 /* [wxMaxima: section start ]
-Parametric
+Parametric Functions
    [wxMaxima: section end   ] */
+
+
+/* [wxMaxima: subsect start ]
+PN-Parameter x
+   [wxMaxima: subsect end   ] */
+
+
+/* [wxMaxima: comment start ]
+Parameters of the legend in Gnuplot (for the graphs): 
+   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
 p: "set linetype 2 dashtype '-'
-    set term pngcairo font 'Arial,24 
+    set term pngcairo font 'Arial,24
     set key top left" $
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/* wxplot2d([parametric, y6N(x), x6N(x), [x,xlow,0.3]], [nticks,100],  [style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"x_{ins}"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$ */;
+xinit(η):= 0.8*xhigh(η); /* starting point of x */
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-y6N(xn,M,η):=fres6N(xlow(M),M,η)-fres6N(xn,M,η);
+t6N(xn,M,η):=fres6N(xlow(M),M,η)-fres6N(xn,M,η);
 /* [wxMaxima: input   end   ] */
 
 
@@ -562,27 +539,7 @@ x6N(xn):=xn;
 
 
 /* [wxMaxima: input   start ] */
-float(fres6N(xlow(40),40,1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-xlow(40);xhigh(1/4);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-float(y6N(xhigh(1/4),40,1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-t_cr(M,η):=float( y6N(xhigh(η),M,η));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-t_cr(40,1/4);
+t_cr(M,η):=float( t6N(xhigh(η),M,η));
 /* [wxMaxima: input   end   ] */
 
 
@@ -592,67 +549,20 @@ Tfin(M,η):=float(0.9*t_cr(M,η));
 
 
 /* [wxMaxima: input   start ] */
-Tfin(40,1/4);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*wxplot2d([parametric, x6N(x), y6N(x), [x,xlow,0.3]], [nticks,100])$*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(x,40,1/4), x6N(x), [x,0.03371103429502694,0.3]], [y,0,0.1],  [style,[lines,5]],[xlabel,"t, sec" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), x6N(x), [x,xlow(Minput),xhigh(ηinput)]], [y,t6N(xlow(Minput),Minput,ηinput),t6N(xhigh(ηinput),Minput,ηinput)],  [style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"x_{ins}"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] );
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*wxplot2d([[parametric, y6N(x,40,1/4), x6N(x), [x,0.03371103429502694,0.3]],xhigh(1/4)], [x,0.03371103429502694,13],[y,0,0.25],  [style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"x_{ins}"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] );*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-xhigh(1/4);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-xlow(20);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-float(fres6N(xlow(40),40,1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-xhigh(1/4);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([y6N(x,5,1/4),t_cr(5,1/4)], [x,0.03371103429502694,0.3], [nticks,100],[style,[lines,5]],[xlabel,"x_{ins}" ],
-           [ylabel,"t, sec"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] );
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d(Expr6N_new(x,40,1/4), [x,0.03371103429502694,0.3], [nticks,100],  [style,[lines,5]],[xlabel,"x" ],
+wxplot2d(Expr6N_new(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)], [nticks,100],  [style,[lines,5]],[xlabel,"x" ],
            [ylabel,"E"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] );
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: subsubsect start ]
+/* [wxMaxima: subsect start ]
 Omega Taylor
-   [wxMaxima: subsubsect end   ] */
-
-
-/* [wxMaxima: comment start ]
-dω/dt = (96/5) * (G * M_chirp / c^3)^(5/3) * ω^(11/3) 
-   [wxMaxima: comment end   ] */
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -660,70 +570,30 @@ omega6N(xn,M,η):=(xn)^(3/2)/Ms(M);
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: comment start ]
-возьмём xplot_beg = 0.06, тогда t=10.88 примерно как у наших друзей на графике
-   [wxMaxima: comment end   ] */
-
-
 /* [wxMaxima: input   start ] */
-xinit(η):= 0.8*xhigh(η);
+wxplot2d([[parametric, t6N(x,Minput,ηinput), omega6N(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]]], [nticks,100], [style,[lines,5]],[xlabel,"t (s)" ],
+           [ylabel,"ω (s^-1)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"]  )$
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: input   start ] */
-wxplot2d([[parametric, y6N(x,40,1/4), omega6N(x,40,1/4), [x,xlow(40),xhigh(1/4)]]], [nticks,100], [style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"ω(x_{ins})"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"]  )$
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: section start ]
+/* [wxMaxima: subsect start ]
 Solving for the Phase
-   [wxMaxima: section end   ] */
+   [wxMaxima: subsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
-dtdx(X,M,η):=float(at(diff(y6N(x,M,η),x),x=X));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-g(X) := at(diff(f(x),x)-8,x=X);
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-dtdx(xlow(40),40,1/4);
+dtdx(X,M,η):=float(at(diff(t6N(x,M,η),x),x=X));
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([[parametric, y6N(x,40,1/4), dtdx(x,40,1/4), [x,xlow(40),xhigh(1/4)]]], [nticks,100], [style,[lines,5]],[xlabel,"t, sec" ],
+wxplot2d([[parametric, t6N(x,Minput,ηinput), dtdx(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]]], [nticks,100], [style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"dtdx)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"]  )$
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*Phiint(xn,M,η):=integrate(omega6N(x,M,η)*dtdx(x,M,η),x,0.001,xn);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
 Phiint(xn,M,η):=float(at(integrate(omega6N(x,M,η)*dtdx(x,M,η),x),x=xn));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-at(Phiint(u,M,η),u=x); 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-at(Phiint(u,M,η),u=xlow(M)); 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*float(at(Phiint(u,M,η),u=x))-float(at(Phiint(u,M,η),u=xlow(M)));*/
 /* [wxMaxima: input   end   ] */
 
 
@@ -733,62 +603,27 @@ Phiins(X,M,η):=float(at(Phiint(u,M,η),u=X)-at(Phiint(u,M,η),u=xlow(M)));
 
 
 /* [wxMaxima: input   start ] */
-float(at(Phiins(X,M,η),[X=xlow(40),M=40,η=1/4]));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*Phiins(X,M,η):=(at(Phiint(x,M,η),x=X));*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*Phiins(X,M,η):=float(at(Phiint(x,M,η),x=X));*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*assume(1000*x-1>0);*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*Phiins(xlow);*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(x,40,1/4), Phiins(x,40,1/4), [x,xlow(40),xhigh(1/4)]], [nticks,100],[style,[lines,5]],[xlabel,"t, c" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), Phiins(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]], [nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"Φ(t)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: section start ]
-derivative of Omega(t) and chirp mass 
+Derivative of Omega(t) and Chirp Mass
    [wxMaxima: section end   ] */
 
 
 /* [wxMaxima: comment start ]
-dω/dt = (96/5) * (G * M_chirp / c^3)^(5/3) * ω^(11/3) 
+dω/dt = (96/5) * (G * M_chirp / c^3)^(5/3) * ω^(11/3)
 
- (G * M_chirp / c^3)^(5/3) = dω/dt * (5/96)* ω^(-11/3) 
+(G * M_chirp / c^3)^(5/3) = dω/dt * (5/96)* ω^(-11/3)
 
- (G * M_chirp / c^3) = (dω/dt * (5/96))^(3/5)* ω^(-11/5) 
+(G * M_chirp / c^3) = (dω/dt * (5/96))^(3/5)* ω^(-11/5)
 
- M_chirp  = (c^3/G)( dω/dt * (5/96) )^(3/5)* ω^(-11/5) 
+M_chirp  = (c^3/G)( dω/dt * (5/96) )^(3/5)* ω^(-11/5)
 
-First, let us define derivative of omega(x) as a Maxima function. 
+First, let us define derivative of omega(x) as a Maxima function.
    [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
- (5/96)^(3/5);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-float((5/96)^(3/5));
-/* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -807,7 +642,7 @@ dwdt(x,M,η):=at(dwdx(X,M,η),X=x)/at(dtdx(X,M,η),X=x);
 
 
 /* [wxMaxima: input   start ] */
-at(dwdt(X,M,η),[X=0.01*xlow(40),M=40,η=1/4]);
+at(dwdt(X,M,η),[X=0.01*xlow(Minput),M=40,η=1/4]);
 /* [wxMaxima: input   end   ] */
 
 
@@ -817,7 +652,7 @@ mass_chirp_func(x,M,η):=float((c^3/G*(at(dwdt(X,m,n),[X=x,m=M,n=η])*5/96)^0.6*
 
 
 /* [wxMaxima: subsect start ]
-for 20+20BH
+Chirp Mass for 20+20BH
    [wxMaxima: subsect end   ] */
 
 
@@ -827,27 +662,27 @@ M_chirp20: (20*20)^(0.6) / (40)^(0.2);
 
 
 /* [wxMaxima: input   start ] */
-mass_chirp_func(0.0001*xlow(40),40,1/4);
+mass_chirp_func(0.0001*xlow(Minput),40,1/4);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-mass_chirp_func(0.01*xlow(40),40,1/4);
+mass_chirp_func(0.01*xlow(Minput),40,1/4);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-mass_chirp_func(xlow(40),40,1/4);
+mass_chirp_func(xlow(Minput),40,1/4);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-mass_chirp_func(2*xlow(40),40,1/4);
+mass_chirp_func(2*xlow(Minput),40,1/4);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: subsect start ]
-for NS 1.5+1.5
+Chirp Mass for NS 1.5+1.5
    [wxMaxima: subsect end   ] */
 
 
@@ -877,7 +712,7 @@ mass_chirp_func(2*xlow(3),3,1/4);
 
 
 /* [wxMaxima: subsect start ]
-for NS 2+1
+Chirp Mass for NS 2+1
    [wxMaxima: subsect end   ] */
 
 
@@ -913,30 +748,25 @@ mass_chirp_func(2*xlow(3),3,2/9);
 
 
 /* [wxMaxima: comment start ]
-M_chirp = (m1*m2)^(3/5) / (m1+m2)^(1/5) --- Ньютон (нет ГВ)
+M_chirp = (m1*m2)^(3/5) / (m1+m2)^(1/5) --- Newton (no GW)
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-xlow(40);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(x,40,1/4), dwdx(x,40,1/4), [x,xlow(40),xhigh(1/4)]], [nticks,100],[style,[lines,5]],[xlabel,"t, c" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), dwdx(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]], [nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"dwdx"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(x,40,1/4), dwdt(x,40,1/4), [x,xlow(40),xhigh(1/4)]], [y,0,100],[nticks,100],[style,[lines,5]],[xlabel,"t, c" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), dwdt(x,Minput,ηinput), [x,xlow(Minput),xhigh(ηinput)]], [y,0,100],[nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"dwdt"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(x,40,1/4), dwdt(x,40,1/4)/omega6N(x,40,1/4)^(11/3), 
-        [x,xlow(40),xhigh(1/4)]], [y,0,1/10^5],[nticks,100],[style,[lines,5]],[xlabel,"t, c" ],
+wxplot2d([parametric, t6N(x,Minput,ηinput), dwdt(x,Minput,ηinput)/omega6N(x,Minput,ηinput)^(11/3),
+        [x,xlow(Minput),xhigh(ηinput)]], [y,0,1/10^5],[nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
            [ylabel,"dwdt"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 
@@ -951,19 +781,13 @@ M_ch:mu^(3/5)*M^(2/5);
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: comment start ]
-dω/dt = (96/5) * (G * M_chirp / c^3)^(5/3) * ω^(11/3) 
-   [wxMaxima: comment end   ] */
-
-
 /* [wxMaxima: section start ]
-Calculating the binaries separation.
+Calculating the Binaries Separation
    [wxMaxima: section end   ] */
 
 
 /* [wxMaxima: comment start ]
-This part is non - zero eccentricity ready. Тут непоняно, как считает Wolfram
-e, и η -- определены, а u -- нет, но у них вылезают цифры
+This part is non-zero eccentricity ready.
    [wxMaxima: comment end   ] */
 
 
@@ -1040,30 +864,8 @@ r3pn(η) :=float(1/(
 
 
 /* [wxMaxima: comment start ]
-Radius corrected to 3PN order:
+Radius corrected to 3PN order (formula (8) from Buskirk, Babiuc-Hamilton, 2018, r and M in the same units):
    [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*r(t) := float(M*(r0pn*xins(t)^-1 + r1pn
-    + r2pn*xins(t)+ r3pn*xins(t)^2 ));*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-r = M*(r0PN*x^−1 + r1PN + r2PN*x + r3PN*x^2) -- это формула 8 из работы Babiuc 2018. 
-
-r и M здесь в одинаковых геометрических единицах.
-
-riPN -- безразмерные коэффициенты, x == x_ins
-
-Сначала пробуем r(t) в ньютоновском приближении, т.е. r0pn = 1.
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: subsubsect start ]
-r0pn = 1
-   [wxMaxima: subsubsect end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -1072,232 +874,35 @@ r(xn,M,η) := float(Ms(M)*(r0pn*xn^-1+r1pn(η)+r2pn(η)*xn+r3pn(η)*xn^2));
 
 
 /* [wxMaxima: input   start ] */
-r(xlow(40),40,1/4);
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Проверим r вблизи Tfin, который у нас другой по сравнению с Вольфрам.
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*tfin6N: t6N(0.1765);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-So xins for tfin6N is 0.1765. The final radius in solar masses and in kilograms
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*xfin6N:0.1765;*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Trying to find xfin6N numerically :
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*solve(t6N(x)=Tfin6,x)*/$/*не работает*/
+r(xlow(Minput),Minput,ηinput);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*horner(t6N(x)=Tfin6,x)*/$/*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/* find_root (t6N(x)=Tfin6,x,0.1,0.15)*/$/*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*t6Ndot(x):=diff(t6N(x),x); */;/*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*solve(t6Ndot(x)=0,x);*/;/*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*find_root(t6N(x)-Tfin6=5,x,0.15,0.2);*/;/*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*load ("newton1");*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*newton(t6N(x)-Tfin6,x,0.1,0.0109);*//*не работает*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-t6N(xins):= (fres6N(xlow)-fres6N(xins)); 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric,y6N(x,40,1/4),r(x,40,1/4),[x,xlow(40),xhigh(1/4)]],
+wxplot2d([parametric,t6N(x,Minput,ηinput),r(x,Minput,ηinput),[x,xlow(Minput),xhigh(ηinput)]],
                [style,[lines,5]],[ylabel," "],
                [xlabel,"x"],[legend,"t6N","fres6N"],
     [gnuplot_preamble, "set term pngcairo font 'Arial,24' ; set key top right" ]  );
 /* [wxMaxima: input   end   ] */
 
 
-/* [wxMaxima: input   start ] */
-/*t6N(0.1838606);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*t6N(0.1838607335060572);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*t6N(0.1838607);*/
-/* [wxMaxima: input   end   ] */
-
-
 /* [wxMaxima: comment start ]
-makelist (expr, i, i_0, i_max, step) 
+r derivative:
    [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*stepf:0.0001;*/
+rdot(x,M,η):=float(diff(r(x,M,η),x)/diff(t6N(x,M,η),x));
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*listtf:makelist (t6N(i), i, xlow, 0.2, stepf)$*/
+at(rdot(xn,Minput,ηinput),xn=xhigh(ηinput));
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-/*length(listtf);*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*number6_1:0; for i: 2 step 1 while( abs(listtf[i]-Tfin6)>abs(listtf[i+1]-Tfin6))  do number6_1:number6_1+1;number6_1+1;*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*abs(listtf[number6_1+1]-Tfin6);(listtf[number6_1+1]);xlow+(number6_1+1)*stepf;*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-с шагом 10^-6 Tfin = 11.96240877871475, xfin = 0.1838607335060572
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*xfin6N:0.1838607335060572;*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*[r(xfin6N)/M,  r(xfin6N)*Mo_m] ;*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-5.438899219702371,321.112609931228 
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-немного не совпадает с вольфрам
-{{3.33295}, {196.777}}
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*wxplot2d([parametric, y6N(x), r(x), [x,xlow,0.3]], [nticks,100],[style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"r(t)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Checking the ISCO separation r = 6 M:
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*[6, 6*M*Mo_m];*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-Time derivative of r used in waveform equations.
-трудное место, см. здесь разные варианты:
-https://stackoverflow.com/questions/8470114/how-to-use-maximas-diff-in-function-definition
-
-См. также о pdiff:
-https://stackoverflow.com/questions/29389480/maxima-evaluate-a-function-fx-embedding-diff-nouns
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*load (pdiff)*/ ;/*проверить, зачем нужен пакет*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-rdot(x,M,η):=float(diff(r(x,M,η),x)/diff(y6N(x,M,η),x)); 
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*xfin6N;*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-at(rdot(xn,40,1/4),xn=xhigh(1/4));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-at(rdot(xn,40,1/4),xn=xlow(40));
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/* rdot(x) := subst([y = x], diff(r(y), y)); не работает */;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*ardot:ev(rdot(tt),tt=11.2)$*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*ardot$*/;
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
-separation r
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*Tinit;Здесь Tinit = Tfin - 1 взят из B-BH, Tfin должно браться по критерию отклонения t(x) и dt/dх от точных значений, а 1 заменяться пропорционально Tfin, например, 0.1%*/
+at(rdot(xn,Minput,ηinput),xn=xlow(Minput));
 /* [wxMaxima: input   end   ] */
 
 
@@ -1307,7 +912,7 @@ Calculation of the Inspiral Waveform
 
 
 /* [wxMaxima: comment start ]
-We will take R = distance to Andromeda=2.401*10^22 m, namely 2.5 million light years
+Following Buskirk, Babiuc-Hamilton, 2018, we will take R = distance to Andromeda = 2.401*10^22 m, namely 2.5 million light years:
    [wxMaxima: comment end   ] */
 
 
@@ -1317,14 +922,7 @@ R_m : 2.401*10^22;
 
 
 /* [wxMaxima: comment start ]
-Strain corrected to 3PN order
-ATTENTION: strain needs to be unitless, and we see that we gave sec^-2 because of the derivatives, and omega, so we need to express r in sec. We do this by multiplying with the mass of the Sun in seconds
-If we want the express R in km, we need to take M in km as well.
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-in seconds:
+In seconds:
    [wxMaxima: comment end   ] */
 
 
@@ -1343,27 +941,6 @@ hre(xn,M,η):=- 2*Ms(M)*η/(R) *
 
 
 /* [wxMaxima: input   start ] */
-at(rdot(xn,40,1/4),xn=xlow(40));
-
-        r(xlow(40),40,1/4);
-omega6N(xlow(40),40,1/4);
-Phiins(xlow(40),40,1/4);
-/* [wxMaxima: input   end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mn>1000</mn><h>*</h><mi>x</mi><mi>-</mi><mn>1</mn><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mi>x</mi><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-
-
-/* [wxMaxima: input   start ] */
 him(xn,M,η):= -2*Ms(M)*η/(R) *
 ((-(at(rdot(x,M,η),x=xn))^2 +
         (r(xn,M,η))^2* omega6N(xn,M,η)^2 +
@@ -1373,36 +950,18 @@ him(xn,M,η):= -2*Ms(M)*η/(R) *
 
 
 /* [wxMaxima: input   start ] */
-him(xlow(40),40,1/4);
-/* [wxMaxima: input   end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mn>1000</mn><h>*</h><mi>x</mi><mi>-</mi><mn>1</mn><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mi>x</mi><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-
-
-/* [wxMaxima: input   start ] */
 hins(xn,M,η) := (hre(xn,M,η) - %i*him(xn,M,η));
 /* [wxMaxima: input   end   ] */
 
 
+/* [wxMaxima: comment start ]
+Check the parameters if needed:
+   [wxMaxima: comment end   ] */
+
+
 /* [wxMaxima: input   start ] */
-/*at(hins(xn,40,1/4),xn=xhigh(1/4));*/
+/*at(rdot(xn,Minput,ηinput),xn=xlow(Minput));*/
 /* [wxMaxima: input   end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mn>113942177</mn><h>*</h><mi>xn</mi><mi>-</mi><mn>3839821</mn><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
 /* [wxMaxima: question  start ] */
 <math><st>Is </st><mn>1000</mn><h>*</h><mi>x</mi><mi>-</mi><mn>1</mn><st> positive, negative or zero?</st></math>
 /* [wxMaxima: question  end   ] */
@@ -1417,38 +976,29 @@ p;
 /* [wxMaxima: answer  end   ] */
 
 
+/* [wxMaxima: input   start ] */
+/*r(xlow(Minput),Minput,ηinput);*/ 
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*omega6N(xlow(Minput),Minput,ηinput);*/
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*Phiins(xlow(Minput),Minput,ηinput);*/
+/* [wxMaxima: input   end   ] */
+
+
 /* [wxMaxima: section start ]
-Expect the Amplitude Evolution to be Smooth
+The Amplitude Evolution and the Final Waveform
    [wxMaxima: section end   ] */
-
-
-/* [wxMaxima: comment start ]
-Plot[Abs[hins[t]], {t, Tinit, Tfin},
- PlotStyle -> {Thickness[0.003], Black}, PlotRange -> All,
- AxesLabel -> {t[sec], inspiral A}]
-   [wxMaxima: comment end   ] */
 
 
 /* [wxMaxima: input   start ] */
 abshins(xn,M,η):=abs(hins(xn,M,η));
 /* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*at(abshins(xn,40,1/4),xn=xhigh(1/4));*/;
-/* [wxMaxima: input   end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mn>1000</mn><h>*</h><mi>x</mi><mi>-</mi><mn>1</mn><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mi>x</mi><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
 
 
 /* [wxMaxima: input   start ] */
@@ -1468,28 +1018,14 @@ p;
 /* [wxMaxima: answer  end   ] */
 
 
-/* [wxMaxima: comment start ]
-g(X) := at(diff(f(x),x)-8,x=X);
-or
-g(x) := subst([y = x], diff(f(y), y) - 8);
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: comment start ]
-wxplot2d(abshins,[t,Tinit,Tfin],
-           [style,[lines,5]],[ylabel," inspiral A "],
-           [xlabel,"t [sec] "])$
-   [wxMaxima: comment end   ] */
-
-
 /* [wxMaxima: input   start ] */
 xinitplot(eta):=0.3*xinit(eta);
 /* [wxMaxima: input   end   ] */
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(xn,40,1/4), abshins(xn,40,1/4), [xn,xinitplot(1/4),xhigh(1/4)]], [nticks,100],[style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"A inspiral(t)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
+wxplot2d([parametric, t6N(xn,Minput,ηinput), abshins(xn,Minput,ηinput), [xn,xinitplot(ηinput),xhigh(ηinput)]], [nticks,100],[style,[lines,5]],[xlabel,"t (s)" ],
+           [ylabel,"A inspiral"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
 /* [wxMaxima: input   end   ] */
 /* [wxMaxima: question  start ] */
 <math><st>Is </st><mn>113942177</mn><h>*</h><mi>x</mi><mi>-</mi><mn>3839821</mn><st> positive, negative or zero?</st></math>
@@ -1500,38 +1036,7 @@ p;
 
 
 /* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(xn,3,1/4), abshins(xn,3,1/4), [xn,xinitplot(1/4),xhigh(1/4)]], [nticks,100],[style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"A inspiral(t)"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"] )$
-/* [wxMaxima: input   end   ] */
-/* [wxMaxima: question  start ] */
-<math><st>Is </st><mn>113942177</mn><h>*</h><mi>x</mi><mi>-</mi><mn>3839821</mn><st> positive, negative or zero?</st></math>
-/* [wxMaxima: question  end   ] */
-/* [wxMaxima: answer  start ] */
-p;
-/* [wxMaxima: answer  end   ] */
-
-
-/* [wxMaxima: input   start ] */
-/*wxplot2d([parametric, y6N(xn,40,1/4), abshins(xn,40,1/4), [xn,xlow(1/4),xinitplot(1/4)]], [nticks,100], [style,[lines,5]],[xlabel,"t, sec" ],
-           [ylabel,"inspiral A"],[gnuplot_preamble, "set term pngcairo font 'Arial,16';"]  )$*/
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(xn,4,1/4), hre(xn,4,1/4), [xn,xinitplot(1/4),xhigh(1/4)]], [nticks,1000], [style,[lines,1]],[xlabel,"t, sec" ],
-           [ylabel,"Re h"],[gnuplot_preamble, "set term pngcairo font 'Arial,16';"]  )$
-/* [wxMaxima: input   end   ] */
-
-
-/* [wxMaxima: comment start ]
- Ahins = Abs[hins[Tfin]]
-Plot hre[t]  Ahins, {t, Tinit, Tfin}, PlotStyle → {Thickness[0.003], Black},
-PlotRange → All, AxesLabel → t[sec], inspiral A × N*10^-19
-   [wxMaxima: comment end   ] */
-
-
-/* [wxMaxima: input   start ] */
-wxplot2d([parametric, y6N(xn,40,1/4), hre(xn,40,1/4)/Ahins(40,1/4), [xn,xlow(40),xhigh(1/4)]], [nticks,100], [style,[lines,1]],[xlabel,"t, sec" ],
+wxplot2d([parametric, t6N(xn,Minput,ηinput), hre(xn,Minput,ηinput)/Ahins(Minput,ηinput), [xn,xlow(Minput),xhigh(ηinput)]], [nticks,100], [style,[lines,1]],[xlabel,"t (s)" ],
            [ylabel,"Re h, normalized"],[gnuplot_preamble, "set term pngcairo font 'Arial,24';"]  )$
 /* [wxMaxima: input   end   ] */
 
